@@ -4,7 +4,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/AliyunContainerService/gpushare-scheduler-extender/pkg/utils"
+	"github.com/alasdairtran/gpushare-scheduler-extender/pkg/utils"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"

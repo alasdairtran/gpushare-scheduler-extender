@@ -8,17 +8,17 @@ Enable the Nvidia runtime as your default runtime on your node. To do this, plea
 
 ```json
 {
-    "default-runtime": "nvidia",
-    "runtimes": {
-        "nvidia": {
-            "path": "/usr/bin/nvidia-container-runtime",
-            "runtimeArgs": []
-        }
+  "default-runtime": "nvidia",
+  "runtimes": {
+    "nvidia": {
+      "path": "/usr/bin/nvidia-container-runtime",
+      "runtimeArgs": []
     }
+  }
 }
 ```
 
-> *if `runtimes` is not already present, head to the install page of [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)*
+> _if `runtimes` is not already present, head to the install page of [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)_
 
 ## 1\. Deploy GPU share scheduler extender
 
@@ -31,6 +31,7 @@ kubectl create -f gpushare-schd-extender.yaml
 ```
 
 ## 2\. Modify scheduler configuration
+
 The goal is to include `/etc/kubernetes/scheduler-policy-config.json` into the scheduler configuration.
 Here is the sample of the modified [kube-scheduler.yaml](../config/kube-scheduler.yaml)
 
@@ -50,8 +51,8 @@ Here is the sample of the modified [kube-scheduler.yaml](../config/kube-schedule
 
 ```yaml
 - hostPath:
-      path: /etc/kubernetes/scheduler-policy-config.json
-      type: FileOrCreate
+    path: /etc/kubernetes/scheduler-policy-config.json
+    type: FileOrCreate
   name: scheduler-policy-config
 ```
 
@@ -82,8 +83,8 @@ kubectl label no mynode gpushare=true
 
 ## 5\. Install Kubectl extension
 
-
 ### 5.1 Install kubectl 1.12 or above
+
 You can download and install `kubectl` for linux
 
 ```bash
@@ -96,6 +97,6 @@ sudo mv ./kubectl /usr/bin/kubectl
 
 ```bash
 cd /usr/bin/
-wget https://github.com/AliyunContainerService/gpushare-device-plugin/releases/download/v0.2.0/kubectl-inspect-gpushare
+wget https://github.com/alasdairtran/gpushare-device-plugin/releases/download/v0.2.0/kubectl-inspect-gpushare
 chmod u+x /usr/bin/kubectl-inspect-gpushare
 ```
