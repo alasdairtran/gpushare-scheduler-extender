@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/AliyunContainerService/gpushare-scheduler-extender/pkg/utils"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	corelisters "k8s.io/client-go/listers/core/v1"
@@ -118,7 +118,9 @@ func (cache *SchedulerCache) RemovePod(pod *v1.Pod) {
 	log.Printf("debug: Node %v", cache.nodes)
 	n, err := cache.GetNodeInfo(pod.Spec.NodeName)
 	if err == nil {
-		n.removePod(pod)
+		for _, dev := range n.devs {
+			dev.removePod(pod)
+		}
 	} else {
 		log.Printf("debug: Failed to get node %s due to %v", pod.Spec.NodeName, err)
 	}

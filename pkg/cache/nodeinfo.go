@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/AliyunContainerService/gpushare-scheduler-extender/pkg/utils"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -74,11 +74,13 @@ func (n *NodeInfo) removePod(pod *v1.Pod) {
 
 	id := utils.GetGPUIDFromAnnotation(pod)
 	if id >= 0 {
-		dev, found := n.devs[id]
+		_, found := n.devs[id]
 		if !found {
 			log.Printf("warn: Pod %s in ns %s failed to find the GPU ID %d in node %s", pod.Name, pod.Namespace, id, n.name)
 		} else {
-			dev.removePod(pod)
+			for _, dev := range n.devs {
+				dev.removePod(pod)
+			}
 		}
 	} else {
 		log.Printf("warn: Pod %s in ns %s is not set the GPU ID %d in node %s", pod.Name, pod.Namespace, id, n.name)
@@ -96,12 +98,14 @@ func (n *NodeInfo) addOrUpdatePod(pod *v1.Pod) (added bool) {
 		pod.Namespace,
 		id)
 	if id >= 0 {
-		dev, found := n.devs[id]
+		_, found := n.devs[id]
 		if !found {
 			log.Printf("warn: Pod %s in ns %s failed to find the GPU ID %d in node %s", pod.Name, pod.Namespace, id, n.name)
 		} else {
-			dev.addPod(pod)
-			added = true
+			for _, dev := range n.devs {
+				dev.addPod(pod)
+				added = true
+			}
 		}
 	} else {
 		log.Printf("warn: Pod %s in ns %s is not set the GPU ID %d in node %s", pod.Name, pod.Namespace, id, n.name)
@@ -189,17 +193,21 @@ func (n *NodeInfo) Allocate(clientset *kubernetes.Clientset, pod *v1.Pod) (err e
 	}
 
 	// 3. update the device info if the pod is update successfully
+	// we just add the pod to all devices
 	if err == nil {
-		log.Printf("debug: Allocate() 3. Try to add pod %s in ns %s to dev %d",
-			pod.Name,
-			pod.Namespace,
-			devId)
-		dev, found := n.devs[devId]
-		if !found {
-			log.Printf("warn: Pod %s in ns %s failed to find the GPU ID %d in node %s", pod.Name, pod.Namespace, devId, n.name)
-		} else {
-			dev.addPod(newPod)
+		for devId, _ := range n.devs {
+			log.Printf("debug: Allocate() 3. Try to add pod %s in ns %s to dev %d",
+				pod.Name,
+				pod.Namespace,
+				devId)
+			dev, found := n.devs[devId]
+			if !found {
+				log.Printf("warn: Pod %s in ns %s failed to find the GPU ID %d in node %s", pod.Name, pod.Namespace, devId, n.name)
+			} else {
+				dev.addPod(newPod)
+			}
 		}
+
 	}
 	log.Printf("debug: Allocate() ----End to allocate GPU for gpu mem for pod %s in ns %s----", pod.Name, pod.Namespace)
 	return err
